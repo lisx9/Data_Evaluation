@@ -4,6 +4,7 @@ import torch.utils.data as data
 from transforms import VideoTransform
 from detector.video_process import VideoProcess
 from detector.detector import LandmarksDetector
+from torchvision.models.video import swin3d_b, Swin3D_B_Weights
 
 class MyDataset(data.Dataset):
     def __init__(self, data_folder, speed_rate=1, transform=True, convert_gray=True):
@@ -37,3 +38,12 @@ class MyDataset(data.Dataset):
 
     def load_video(self, data_filename):
         return torchvision.io.read_video(data_filename, pts_unit='sec')[0].numpy()
+
+    def get_swin_feature(self, vid):
+        weights = Swin3D_B_Weights.KINETICS400_IMAGENET22K_V1
+        model = swin3d_b(weights=weights)
+        model.eval()
+        preprocess = weights.transforms()
+        batch = preprocess(vid).unsqueeze(0)
+        feature = model(batch).squeeze(0)
+        return feature

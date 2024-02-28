@@ -6,8 +6,8 @@
 
 import warnings
 import torchvision
-from ibug.face_detection import RetinaFacePredictor
-from ibug.face_alignment import FANPredictor
+from face_detection.ibug.face_detection import RetinaFacePredictor
+from face_alignment.ibug.face_alignment import FANPredictor
 warnings.filterwarnings("ignore")
 
 
