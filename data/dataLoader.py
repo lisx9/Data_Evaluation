@@ -1,7 +1,7 @@
 import os
 import torch, torchvision
 import torch.utils.data as data
-from transforms import VideoTransform
+from data.transforms import VideoTransform
 from detector.video_process import VideoProcess
 from detector.detector import LandmarksDetector
 from torchvision.models.video import s3d, S3D_Weights

@@ -1,4 +1,6 @@
-from torchvision.io.video import read_video
+from data.dataReduction import DataReduction
 
-vid, _, _ = read_video("D:/lipreading/graduation/dataset/video/20220101100.mp4", output_format="TCHW")
-print(vid.shape)
+data_reduction = DataReduction("D:/lipreading/graduation/dataset")
+data = data_reduction.data_reduce()
+print(data)
+print(data.shape)
