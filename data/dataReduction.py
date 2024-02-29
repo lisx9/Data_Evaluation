@@ -21,7 +21,7 @@ class DataReduction:
             video, label = my_datasset.__getitem__(i)
             video = video.transpose(1, 3)   #(T, C, H, W)
             video = video[:8]
-            feature = my_datasset.get_s3d_feature(video)
+            feature = my_datasset.get_swin_feature(video)
             depth = feature.shape[0]
             X.append(feature)
             y.append(label)
