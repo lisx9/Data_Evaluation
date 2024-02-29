@@ -2,7 +2,8 @@ import os
 import torch
 from data.dataLoader import MyDataset
 from data.LSH import EuclideanLSH
-import statistics
+import numpy as np
+import math
 import random
 
 class DataReduction:
@@ -29,21 +30,36 @@ class DataReduction:
         X = X.detach().cpu().numpy()
         lsh = EuclideanLSH(tables_num, a, depth)
         lsh.insert(X)
-        bucket_size = []
-        standard_deviation = []
-        n_sample = []
-        N = 0
-        for i in range(tables_num):
-            n_i = len(lsh.hash_tables[i])
-            s_i = statistics.stdev(lsh.hash_tables[i].values())
-            bucket_size.append(n_i)
-            standard_deviation.append(s_i)
-            N += n_i * s_i
-        for i in range(tables_num):
-            num = int(file_size * bucket_size[i] * standard_deviation[i] / N)
-            n_sample.append(num)
         data = []
-        for i in range(tables_num):
-            sampled_subset = random.choices(lsh.hash_tables[i], k=n_sample[i])
-            data.append(sampled_subset)
+        tables = lsh.hash_tables
+        n_samples = self.get_samples(tables, file_size)
+        for i in range(len(tables)):
+            res = random.sample(tables[i], n_samples[i])
+            for j in res:
+                data.append(j)
+        data = np.array(data)
         return torch.Tensor(data)
+    def get_samples(self, data, N):
+        '''
+        :param data: lsh分桶后的数据
+        :param N: 数据总量
+        :return: 抽取的样本
+        '''
+        n = [len(x) for x in data]
+        s = [self.get_deviation(x) for x in data]
+        n_s = [a * b for a, b in zip(n, s)]
+        n_samples = [int(N * a / sum(n_s)) if int(N * a / sum(n_s)) > 0 else 1 for a in n_s]
+        return n_samples
+
+
+    def get_deviation(self, data):
+        vec_sum = np.zeros(data[0].shape)
+        for i in data:
+            vec_sum = np.add(vec_sum, i)
+        bar_x = vec_sum / len(data)
+        cov_sum = 0
+        for i in data:
+            res = [(a - b)**2 for a, b in zip(i, bar_x)]
+            cov_sum += sum(res)
+        cov_sum = cov_sum / (len(data) - 1)
+        return math.sqrt(cov_sum)
