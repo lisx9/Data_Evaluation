@@ -53,13 +53,25 @@ class DataReduction:
 
 
     def get_deviation(self, data):
+        '''
+        :param data: lsh某一个桶的数据
+        :return: 该桶数据的标准差
+        '''
         vec_sum = np.zeros(data[0].shape)
         for i in data:
             vec_sum = np.add(vec_sum, i)
         bar_x = vec_sum / len(data)
         cov_sum = 0
         for i in data:
-            res = [(a - b)**2 for a, b in zip(i, bar_x)]
+            res = [(a - b)**2 * self.get_times(i[0], bar_x[0]) for a, b in zip(i, bar_x)]
             cov_sum += sum(res)
         cov_sum = cov_sum / (len(data) - 1)
         return math.sqrt(cov_sum)
+
+    def get_times(a, b):
+        res = str((a - b) ** 2)
+        index = res.find('e')
+        if index == -1:
+            return 1
+        else:
+            return eval("1e" + res[index + 2:])
